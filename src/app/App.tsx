@@ -10,10 +10,17 @@ import { Contact } from "./components/Contact";
 import { CanvasGrid } from "./components/CanvasGrid";
 import { CanvasRuler } from "./components/CanvasRuler";
 import { YouCursor } from "./components/YouCursor";
+import { Collaborators } from "./components/Collaborators";
+import { TOP_BASE } from "./lib/layout";
+import { usePointerFine } from "./lib/usePointerFine";
 
 export default function App() {
   const [loaded, setLoaded] = useState(false);
   const reduce = useReducedMotion();
+  // YouCursor independently bails out on touch devices (no hover) — this
+  // must agree with it, or a touch device with `reduce` off gets the
+  // `cursor-none` class and no replacement cursor at all.
+  const pointerFine = usePointerFine();
 
   useEffect(() => {
     if (!loaded) {
@@ -28,12 +35,15 @@ export default function App() {
   }, [loaded]);
 
   return (
-    <div className={`relative min-h-screen w-full ${reduce ? "" : "cursor-none"} bg-background text-foreground antialiased`}>
+    <div className={`relative min-h-screen w-full ${!reduce && pointerFine ? "cursor-none" : ""} bg-background text-foreground antialiased`}>
       {/* Canvas dot grid — fixed behind everything */}
       <CanvasGrid />
 
       {/* Multiplayer-style YOU cursor */}
       <YouCursor />
+
+      {/* Signature moment: scripted, one-shot collaborator cursors — see Collaborators.tsx */}
+      <Collaborators ready={loaded} />
 
       <Loader onDone={() => setLoaded(true)} />
       <Nav ready={loaded} />
@@ -41,8 +51,8 @@ export default function App() {
       {/* Scroll-tied ruler sits just below nav (top: 56px in CanvasRuler) */}
       <CanvasRuler />
 
-      {/* Main content offset to clear nav (56px) + ruler (28px) = 84px */}
-      <main className="pt-[84px]">
+      {/* Main content offset to clear nav + ruler — see src/app/lib/layout.ts */}
+      <main style={{ paddingTop: TOP_BASE }}>
         <Hero ready={loaded} />
         <About />
         <Projects />

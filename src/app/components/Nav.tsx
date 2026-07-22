@@ -1,6 +1,11 @@
-import { motion, useScroll, useSpring } from "motion/react";
-import { useEffect, useState } from "react";
+import { motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring } from "motion/react";
+import { useRef, useState } from "react";
 import { Heart, Mail, Github, Linkedin } from "lucide-react";
+import { useActiveSection } from "../lib/useActiveSection";
+import { useScrollY } from "../lib/useRafScroll";
+import { EASE_OUT_EXPO } from "../lib/motion-tokens";
+
+const SECTION_IDS = ["top", "about", "work", "experience", "contact"];
 
 const NAV_LINKS = [
   { label: "HOME", href: "#top" },
@@ -25,39 +30,37 @@ function RainbowLogo() {
 }
 
 export function Nav({ ready }: { ready: boolean }) {
+  const reduce = useReducedMotion();
   const { scrollYProgress } = useScroll();
-  const progress = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
+  // Under reduced motion, bind the bar straight to scrollYProgress — a
+  // spring keeps its own rAF driver alive briefly after scroll settles,
+  // which is exactly the kind of lingering motion reduced-motion asks to skip.
+  const springProgress = useSpring(scrollYProgress, { stiffness: 120, damping: 30 });
+  const progress = reduce ? scrollYProgress : springProgress;
+
+  // Shares the module-level, rAF-coalesced scroll listener (see useRafScroll)
+  // instead of registering its own — Nav previously ran two independent
+  // unthrottled `scroll` listeners.
+  const scrollY = useScrollY();
   const [scrolled, setScrolled] = useState(false);
-  const [active, setActive] = useState("top");
+  const wasScrolled = useRef(false);
+  useMotionValueEvent(scrollY, "change", (y) => {
+    const next = y > 40;
+    if (next !== wasScrolled.current) {
+      wasScrolled.current = next;
+      setScrolled(next);
+    }
+  });
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  useEffect(() => {
-    const sections = ["contact", "work", "about", "top"];
-    const onScroll = () => {
-      for (const id of sections) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= 120) {
-          setActive(id);
-          return;
-        }
-      }
-      setActive("top");
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  // IntersectionObserver-based — replaces a getElementById + getBoundingClientRect
+  // scan over every tracked section on every scroll event (forced reflow).
+  const active = useActiveSection(SECTION_IDS);
 
   return (
     <motion.header
-      initial={{ y: -40, opacity: 0 }}
+      initial={reduce ? false : { y: -40, opacity: 0 }}
       animate={ready ? { y: 0, opacity: 1 } : {}}
-      transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.8, delay: 0.2, ease: EASE_OUT_EXPO }}
       className="fixed inset-x-0 top-0 z-50"
     >
       <div

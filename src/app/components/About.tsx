@@ -73,8 +73,12 @@ export function About() {
                   <div className="text-[0.85rem] opacity-90 font-medium">Devspace · 2024–Present</div>
                 </StickyNote>
                 <StickyNote color="grass" rotate={2}>
+                  <div className="text-[0.9rem] font-semibold">Software Engineer</div>
+                  <div className="text-[0.85rem] opacity-90 font-medium">VDT · Sep 2026–Present</div>
+                </StickyNote>
+                <StickyNote color="sunflower" rotate={-1}>
                   <div className="text-[0.9rem] font-semibold">Software Engineering Intern</div>
-                  <div className="text-[0.85rem] opacity-90 font-medium">VDT · 2023–2024</div>
+                  <div className="text-[0.85rem] opacity-90 font-medium">LAPO · Mar–Aug 2026</div>
                 </StickyNote>
               </div>
             </FadeIn>
@@ -110,8 +114,9 @@ export function About() {
                     {c.title}
                   </h3>
                   <p className="text-[0.95rem] font-medium leading-relaxed text-foreground/85">{c.body}</p>
+                  {/* scaleX, not width — width is a layout property and this animates on every card hover */}
                   <div
-                    className="mt-4 h-0.5 w-12 rounded-full transition-all duration-500 group-hover:w-full"
+                    className="mt-4 h-0.5 w-full origin-left scale-x-[0.25] rounded-full transition-transform duration-500 group-hover:scale-x-100"
                     style={{ background: c.color }}
                   />
                 </motion.article>

@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { NetworkCanvas } from "./NetworkCanvas";
+import { EASE_OUT_EXPO, EASE_IN_OUT_EXPO } from "../lib/motion-tokens";
 
 const BOOT_LINES = [
   "$ init osato.canvas",
@@ -12,9 +13,16 @@ const BOOT_LINES = [
 
 export function Loader({ onDone }: { onDone: () => void }) {
   const reduce = useReducedMotion();
-  const [progress, setProgress] = useState(0);
   const [visibleLines, setVisibleLines] = useState(0);
   const [done, setDone] = useState(false);
+  // Progress is written directly to the DOM every frame instead of through
+  // React state — this ran two `setState` calls per frame for ~2.2s
+  // (P8a), and the bar itself animated `width` (a layout property, P8b)
+  // during the single most contended moment of page life. `scaleX` on a
+  // ref is a pure composite; `textContent` on a ref is not a React render.
+  const barRef = useRef<HTMLDivElement>(null);
+  const pctRef = useRef<HTMLSpanElement>(null);
+  const lastLines = useRef(0);
 
   useEffect(() => {
     const total = reduce ? 400 : 2200;
@@ -23,10 +31,18 @@ export function Loader({ onDone }: { onDone: () => void }) {
     let doneTimeout: ReturnType<typeof setTimeout> | undefined;
     const tick = (now: number) => {
       const p = Math.min(1, (now - start) / total);
-      setProgress(p);
-      setVisibleLines(Math.floor(p * BOOT_LINES.length + 0.001));
+      if (barRef.current) barRef.current.style.transform = `scaleX(${p})`;
+      if (pctRef.current) {
+        pctRef.current.textContent = `${Math.round(p * 100).toString().padStart(3, "0")}%`;
+      }
+      const nextLines = Math.floor(p * BOOT_LINES.length + 0.001);
+      if (nextLines !== lastLines.current) {
+        lastLines.current = nextLines;
+        setVisibleLines(nextLines);
+      }
       if (p < 1) raf = requestAnimationFrame(tick);
       else {
+        lastLines.current = BOOT_LINES.length;
         setVisibleLines(BOOT_LINES.length);
         doneTimeout = setTimeout(() => setDone(true), reduce ? 0 : 300);
       }
@@ -44,7 +60,7 @@ export function Loader({ onDone }: { onDone: () => void }) {
         <motion.div
           className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-[#141414] overflow-hidden"
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.6, ease: EASE_OUT_EXPO }}
         >
           {/* Animated 2D network background */}
           <NetworkCanvas
@@ -58,7 +74,7 @@ export function Loader({ onDone }: { onDone: () => void }) {
             initial={{ scaleY: 1 }}
             animate={done ? { scaleY: 0 } : { scaleY: 1 }}
             style={{ originY: 1 }}
-            transition={{ duration: 0.7, ease: [0.83, 0, 0.17, 1] }}
+            transition={{ duration: 0.7, ease: EASE_IN_OUT_EXPO }}
           />
 
           <div className="relative z-20 w-full max-w-md px-8 select-none">
@@ -72,8 +88,8 @@ export function Loader({ onDone }: { onDone: () => void }) {
 
             <div className="mb-3 flex items-baseline justify-between font-mono text-[12px] uppercase tracking-[0.2em] text-white/70 font-semibold">
               <span>Loading canvas</span>
-              <span style={{ color: "#4EA3E0" }} className="font-bold text-[13px]">
-                {Math.round(progress * 100).toString().padStart(3, "0")}%
+              <span ref={pctRef} style={{ color: "#4EA3E0" }} className="font-bold text-[13px]">
+                000%
               </span>
             </div>
 
@@ -91,12 +107,12 @@ export function Loader({ onDone }: { onDone: () => void }) {
               ))}
             </div>
 
-            {/* Progress bar */}
+            {/* Progress bar — scaleX (composited transform), not width (layout) */}
             <div className="h-0.5 w-full overflow-hidden rounded-full bg-white/10">
-              <motion.div
-                className="h-full rounded-full"
-                style={{ width: `${progress * 100}%`, background: "#4EA3E0" }}
-                transition={{ ease: "linear" }}
+              <div
+                ref={barRef}
+                className="h-full w-full origin-left rounded-full"
+                style={{ transform: "scaleX(0)", background: "#4EA3E0" }}
               />
             </div>
           </div>

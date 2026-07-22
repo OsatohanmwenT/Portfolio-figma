@@ -8,9 +8,30 @@ type Node = {
   r: number;
 };
 
+const ALPHA_TIERS = 5;
+const MAX_ALPHA = 0.22;
+
 /**
  * Interactive 2D network field: charcoal nodes connected by hairlines that
  * react to the cursor. Pauses when off-screen and disables under reduced motion.
+ *
+ * Fixed in this pass (see the perf audit for detail):
+ *  - rAF re-registration race: `start()`/`stop()` now gate on an explicit
+ *    `running` flag. Previously an in-flight `draw()` could re-register
+ *    itself *after* `start()` had already assigned a fresh `raf` id,
+ *    silently doubling the loop with only one id left cancellable.
+ *  - O(n²) edge pass (4,005 pair tests at 90 nodes) replaced with a
+ *    uniform spatial grid — each node only tests candidates in its own
+ *    cell + 8 neighbours.
+ *  - ~250 unbatched `beginPath`/`stroke()` calls per frame, each preceded
+ *    by a freshly-allocated `strokeStyle` template string (defeating Skia's
+ *    batching), replaced with 5 alpha tiers accumulated into reused arrays
+ *    and flushed as 5 batched strokes with 5 precomputed constant strings.
+ *  - `mouseout` on window (bubbles from every element, so it fired on
+ *    every element-boundary crossing during normal mouse movement) swapped
+ *    for `mouseleave` on `documentElement`, matching `YouCursor`.
+ *  - `visibilitychange` now stops the loop on a backgrounded tab instead of
+ *    relying solely on browser rAF throttling.
  */
 export function NetworkCanvas({
   className = "",
@@ -25,19 +46,30 @@ export function NetworkCanvas({
   const mouse = useRef({ x: -9999, y: -9999, active: false });
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    const canvasEl = canvasRef.current;
+    if (!canvasEl) return;
+    const ctx2d = canvasEl.getContext("2d");
+    if (!ctx2d) return;
+    // Rebound so nested closures see a non-nullable type instead of the
+    // ref's `| null` type (TS doesn't retain narrowing across closures).
+    const canvas = canvasEl;
+    const ctx = ctx2d;
 
-    const reduce = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     let nodes: Node[] = [];
     let raf = 0;
-    let visible = true;
-    let dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let running = false;
+    let dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+
+    // Reused across frames — cleared, not reallocated, to keep this rAF
+    // loop free of per-frame allocation beyond the unavoidable grid buckets.
+    const grid = new Map<number, number[]>();
+    const tierSegments: number[][] = Array.from({ length: ALPHA_TIERS }, () => []);
+    const tierColors = Array.from({ length: ALPHA_TIERS }, (_, t) => {
+      const alpha = ((t + 0.5) / ALPHA_TIERS) * MAX_ALPHA;
+      return `rgba(242,240,235,${alpha.toFixed(3)})`;
+    });
 
     function build() {
       const parent = canvas.parentElement;
@@ -66,6 +98,7 @@ export function NetworkCanvas({
       ctx.clearRect(0, 0, w, h);
 
       const linkDist = Math.min(160, w * 0.16);
+      const cellSize = linkDist;
 
       for (let i = 0; i < nodes.length; i++) {
         const n = nodes[i];
@@ -87,30 +120,69 @@ export function NetworkCanvas({
         }
       }
 
-      // edges
+      // spatial grid, rebuilt each frame (positions moved) but reusing the
+      // same Map/array instances rather than allocating new ones
+      grid.clear();
       for (let i = 0; i < nodes.length; i++) {
-        for (let j = i + 1; j < nodes.length; j++) {
-          const a = nodes[i];
-          const b = nodes[j];
-          const d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (d < linkDist) {
-            const alpha = (1 - d / linkDist) * 0.22;
-            ctx.strokeStyle = `rgba(242,240,235,${alpha})`;
-            ctx.lineWidth = 0.6;
-            ctx.beginPath();
-            ctx.moveTo(a.x, a.y);
-            ctx.lineTo(b.x, b.y);
-            ctx.stroke();
+        const n = nodes[i];
+        const cx = Math.floor(n.x / cellSize);
+        const cy = Math.floor(n.y / cellSize);
+        const key = cx * 100000 + cy;
+        let bucket = grid.get(key);
+        if (!bucket) {
+          bucket = [];
+          grid.set(key, bucket);
+        }
+        bucket.push(i);
+      }
+
+      // edges — each unordered pair tested exactly once (own cell + 8
+      // neighbours, keeping only j > i), alpha quantised into batched tiers
+      for (const tier of tierSegments) tier.length = 0;
+
+      for (let i = 0; i < nodes.length; i++) {
+        const a = nodes[i];
+        const cx = Math.floor(a.x / cellSize);
+        const cy = Math.floor(a.y / cellSize);
+        for (let ddx = -1; ddx <= 1; ddx++) {
+          for (let ddy = -1; ddy <= 1; ddy++) {
+            const bucket = grid.get((cx + ddx) * 100000 + (cy + ddy));
+            if (!bucket) continue;
+            for (const j of bucket) {
+              if (j <= i) continue;
+              const b = nodes[j];
+              const d = Math.hypot(a.x - b.x, a.y - b.y);
+              if (d < linkDist) {
+                const alpha = (1 - d / linkDist) * MAX_ALPHA;
+                const tier = Math.min(
+                  ALPHA_TIERS - 1,
+                  Math.floor((alpha / MAX_ALPHA) * ALPHA_TIERS),
+                );
+                tierSegments[tier].push(a.x, a.y, b.x, b.y);
+              }
+            }
           }
         }
+      }
+
+      ctx.lineWidth = 0.6;
+      for (let t = 0; t < ALPHA_TIERS; t++) {
+        const segs = tierSegments[t];
+        if (segs.length === 0) continue;
+        ctx.strokeStyle = tierColors[t];
+        ctx.beginPath();
+        for (let k = 0; k < segs.length; k += 4) {
+          ctx.moveTo(segs[k], segs[k + 1]);
+          ctx.lineTo(segs[k + 2], segs[k + 3]);
+        }
+        ctx.stroke();
       }
 
       // nodes
       for (const n of nodes) {
         let near = false;
         if (mouse.current.active) {
-          near =
-            Math.hypot(mouse.current.x - n.x, mouse.current.y - n.y) < 120;
+          near = Math.hypot(mouse.current.x - n.x, mouse.current.y - n.y) < 120;
         }
         ctx.beginPath();
         ctx.fillStyle = near ? accent : "rgba(242,240,235,0.5)";
@@ -125,26 +197,36 @@ export function NetworkCanvas({
         ctx.arc(mouse.current.x, mouse.current.y, 2.5, 0, Math.PI * 2);
         ctx.fill();
       }
+    }
 
-      raf = requestAnimationFrame(draw);
+    // The rAF loop itself — contains no scheduling decisions. `start()` and
+    // `stop()` are the only places that touch `running`/`raf`, so there is
+    // exactly one code path that can ever have a live loop.
+    function loop() {
+      draw();
+      if (running) raf = requestAnimationFrame(loop);
     }
 
     function start() {
-      cancelAnimationFrame(raf);
+      if (running) return; // idempotent — this is what the old race broke
       if (reduce) {
-        // render a single static frame
-        draw();
-        cancelAnimationFrame(raf);
-        raf = 0;
+        draw(); // single static frame, no loop
         return;
       }
-      raf = requestAnimationFrame(draw);
+      running = true;
+      raf = requestAnimationFrame(loop);
+    }
+
+    function stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+      raf = 0;
     }
 
     function onResize() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
       build();
-      if (reduce) start();
+      if (reduce) draw();
     }
 
     function onMove(e: MouseEvent) {
@@ -158,12 +240,15 @@ export function NetworkCanvas({
       mouse.current.x = -9999;
       mouse.current.y = -9999;
     }
+    function onVisibilityChange() {
+      if (document.visibilityState === "hidden") stop();
+      else if (!reduce) start();
+    }
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        visible = entry.isIntersecting;
-        if (visible && !reduce) start();
-        else cancelAnimationFrame(raf);
+        if (entry.isIntersecting) start();
+        else stop();
       },
       { threshold: 0 },
     );
@@ -173,14 +258,16 @@ export function NetworkCanvas({
     io.observe(canvas);
     window.addEventListener("resize", onResize);
     window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseout", onLeave);
+    document.documentElement.addEventListener("mouseleave", onLeave);
+    document.addEventListener("visibilitychange", onVisibilityChange);
 
     return () => {
-      cancelAnimationFrame(raf);
+      stop();
       io.disconnect();
       window.removeEventListener("resize", onResize);
       window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseout", onLeave);
+      document.documentElement.removeEventListener("mouseleave", onLeave);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
     };
   }, [density, accent]);
 

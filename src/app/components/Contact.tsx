@@ -1,6 +1,8 @@
-import { motion } from "motion/react";
+import { animate, motion, useInView, useMotionValue, useReducedMotion, useSpring } from "motion/react";
+import { useCallback, useEffect, useRef } from "react";
 import { Mail, Github, Linkedin, Twitter, ArrowUpRight } from "lucide-react";
 import { PixelHeading, ScriptAccent, CommentCard, MagneticButton, FadeIn } from "./primitives";
+import { SPRING } from "../lib/motion-tokens";
 
 const CHANNELS = [
   {
@@ -29,44 +31,92 @@ const CHANNELS = [
   },
 ];
 
+const PUPIL_RANGE = { x: 4, y: 3 };
+
+/**
+ * Previously animated `ry` (an SVG geometry attribute, not a transform) on
+ * `repeat: Infinity` with no reduced-motion guard and no viewport gate — the
+ * only permanent frame producer on the settled page, and the reason a
+ * headless screenshot of this site never reached quiescence. Replaced with:
+ * a one-shot blink (triggered on scroll-into-view + hover/click, never
+ * looping) driven by `scaleY` on a wrapping `<g>`, plus pupils that track the
+ * cursor via spring-driven `x`/`y` transforms. Both are transform-only —
+ * composited, not layout/paint — and both go idle (zero cost) at rest.
+ */
 function BlobMascot() {
+  const reduce = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+  const inView = useInView(containerRef, { once: true, margin: "-10%" });
+
+  const leftLidScaleY = useMotionValue(1);
+  const rightLidScaleY = useMotionValue(1);
+  const pupilX = useMotionValue(0);
+  const pupilY = useMotionValue(0);
+  const sPupilX = useSpring(pupilX, SPRING.soft);
+  const sPupilY = useSpring(pupilY, SPRING.soft);
+
+  const blink = useCallback(() => {
+    if (reduce) return;
+    const opts = { duration: 0.42, times: [0, 0.5, 1], ease: "easeInOut" as const };
+    animate(leftLidScaleY, [1, 0.08, 1], opts);
+    animate(rightLidScaleY, [1, 0.08, 1], opts);
+  }, [reduce, leftLidScaleY, rightLidScaleY]);
+
+  // One blink when the mascot first scrolls into view. Not a loop — fires once.
+  useEffect(() => {
+    if (inView) blink();
+  }, [inView, blink]);
+
+  function onPointerEnter() {
+    if (reduce || !containerRef.current) return;
+    rectRef.current = containerRef.current.getBoundingClientRect();
+  }
+  function onPointerMove(e: React.PointerEvent) {
+    if (reduce || !rectRef.current) return;
+    const rect = rectRef.current;
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = (e.clientX - cx) / (rect.width / 2);
+    const dy = (e.clientY - cy) / (rect.height / 2);
+    pupilX.set(Math.max(-1, Math.min(1, dx)) * PUPIL_RANGE.x);
+    pupilY.set(Math.max(-1, Math.min(1, dy)) * PUPIL_RANGE.y);
+  }
+  function onPointerLeave() {
+    pupilX.set(0);
+    pupilY.set(0);
+  }
+
   return (
-    <svg
-      width="120"
-      height="120"
-      viewBox="0 0 120 120"
-      fill="none"
-      className="shrink-0"
+    <div
+      ref={containerRef}
+      onPointerEnter={onPointerEnter}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
+      onClick={blink}
+      className="shrink-0 cursor-pointer"
     >
-      <path
-        d="M60 10 C80 8, 105 25, 110 50 C115 75, 100 105, 75 112 C50 119, 20 105, 12 78 C4 51, 18 14, 60 10 Z"
-        fill="#141414"
-      />
-      {/* eyes */}
-      <motion.ellipse
-        cx="45"
-        cy="58"
-        rx="6"
-        ry="7"
-        fill="white"
-        animate={{ ry: [7, 1, 7] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
-      />
-      <motion.ellipse
-        cx="75"
-        cy="58"
-        rx="6"
-        ry="7"
-        fill="white"
-        animate={{ ry: [7, 1, 7] }}
-        transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", repeatDelay: 2 }}
-      />
-      {/* pupils */}
-      <circle cx="45" cy="60" r="3" fill="#141414" />
-      <circle cx="75" cy="60" r="3" fill="#141414" />
-      {/* smile */}
-      <path d="M48 76 Q60 86 72 76" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" />
-    </svg>
+      <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+        <path
+          d="M60 10 C80 8, 105 25, 110 50 C115 75, 100 105, 75 112 C50 119, 20 105, 12 78 C4 51, 18 14, 60 10 Z"
+          fill="#141414"
+        />
+        <motion.g style={{ x: sPupilX, y: sPupilY }}>
+          {/* eye whites — blink via scaleY, never via the ry attribute */}
+          <motion.g style={{ scaleY: leftLidScaleY, transformOrigin: "45px 58px" }}>
+            <ellipse cx="45" cy="58" rx="6" ry="7" fill="white" />
+          </motion.g>
+          <motion.g style={{ scaleY: rightLidScaleY, transformOrigin: "75px 58px" }}>
+            <ellipse cx="75" cy="58" rx="6" ry="7" fill="white" />
+          </motion.g>
+          {/* pupils */}
+          <circle cx="45" cy="60" r="3" fill="#141414" />
+          <circle cx="75" cy="60" r="3" fill="#141414" />
+        </motion.g>
+        {/* smile */}
+        <path d="M48 76 Q60 86 72 76" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      </svg>
+    </div>
   );
 }
 

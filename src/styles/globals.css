@@ -1,0 +1,35 @@
+/*
+ * Section-scoped CSS previously injected via <style dangerouslySetInnerHTML>
+ * inside Hero.tsx and Projects.tsx render trees. That pattern re-inserts and
+ * re-parses the <style> tag on every render of those components, and each
+ * insertion invalidates whole-document style resolution — moved here so it's
+ * parsed once, at load.
+ */
+
+/* Hero.tsx — name selection color override */
+.hero-name-text::selection {
+  background: #141414 !important;
+  color: #ffffff !important;
+}
+
+/* Projects.tsx — responsive stacked-panel tab sizing */
+.project-section-container {
+  --tab-w: 64px;
+  --tab-overlap: 10px;
+  --tab-h: 40px;
+  --px-padding: 24px;
+}
+@media (min-width: 400px) {
+  .project-section-container {
+    --tab-w: 75px;
+    --tab-overlap: 12px;
+  }
+}
+@media (min-width: 768px) {
+  .project-section-container {
+    --tab-w: 180px;
+    --tab-overlap: 18px;
+    --tab-h: 44px;
+    --px-padding: 40px;
+  }
+}

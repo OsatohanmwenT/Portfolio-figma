@@ -15,6 +15,7 @@ import React, {
   type ReactNode,
   type RefObject,
 } from "react";
+import { EASE_OUT_EXPO } from "../lib/motion-tokens";
 
 const SCRAMBLE_CHARS = "!<>-_\\/[]{}—=+*^?#01";
 
@@ -106,7 +107,7 @@ export function RevealText({
         className={className}
         initial={reduce ? { opacity: 0 } : { y: "110%" }}
         animate={inView ? (reduce ? { opacity: 1 } : { y: "0%" }) : {}}
-        transition={{ duration: 0.9, delay, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.9, delay, ease: EASE_OUT_EXPO }}
       >
         {children}
       </MotionTag>
@@ -137,7 +138,7 @@ export function FadeIn({
       className={className}
       initial={{ opacity: 0, y: reduce ? 0 : y }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, delay, ease: [0.16, 1, 0.3, 1] }}
+      transition={{ duration: 0.8, delay, ease: EASE_OUT_EXPO }}
     >
       {children}
     </motion.div>
@@ -220,29 +221,36 @@ export function CountUp({
   duration?: number;
   className?: string;
 }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" });
-  const [val, setVal] = useState(0);
+  // Previously `setVal` fired once per animation frame via `onUpdate` — up
+  // to 3 re-renders/frame when a Projects panel lands with 3 metrics
+  // counting up together. The value is now written straight to the DOM;
+  // only the container re-renders, and only for the (rare) inView/reduce
+  // transitions, not for the animation itself.
+  const containerRef = useRef<HTMLSpanElement>(null);
+  const valueRef = useRef<HTMLSpanElement>(null);
+  const inView = useInView(containerRef, { once: true, margin: "-10% 0px" });
   const reduce = useReducedMotion();
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || !valueRef.current) return;
     if (reduce) {
-      setVal(to);
+      valueRef.current.textContent = to.toFixed(decimals);
       return;
     }
     const controls = animate(0, to, {
       duration,
-      ease: [0.16, 1, 0.3, 1],
-      onUpdate: (v) => setVal(v),
+      ease: EASE_OUT_EXPO,
+      onUpdate: (v) => {
+        if (valueRef.current) valueRef.current.textContent = v.toFixed(decimals);
+      },
     });
     return () => controls.stop();
-  }, [inView, to, duration, reduce]);
+  }, [inView, to, duration, decimals, reduce]);
 
   return (
-    <span ref={ref} className={className}>
+    <span ref={containerRef} className={className}>
       {prefix}
-      {val.toFixed(decimals)}
+      <span ref={valueRef}>{(0).toFixed(decimals)}</span>
       {suffix}
     </span>
   );

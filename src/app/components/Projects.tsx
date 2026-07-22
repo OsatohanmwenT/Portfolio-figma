@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import { PixelHeading, ScriptAccent, StickyNote, FadeIn, CountUp } from "./primitives";
+import { TOP_BASE } from "../lib/layout";
 
 type Metric = { label: string; value: number; suffix?: string; decimals?: number };
 
@@ -155,10 +156,6 @@ const PROJECTS: Project[] = [
     mockupLines: ["Members: 1,204", "Attendance: 87%", "Tithes: ₦4.2M", "5 active modules"],
   },
 ];
-
-const NAV_H = 56;
-const RULER_H = 28;
-const TOP_BASE = NAV_H + RULER_H; // 84px — clears fixed header
 
 function ProjectMockup({ project }: { project: Project }) {
   const isDark =
@@ -334,10 +331,13 @@ function ProjectPanel({
         className="relative w-full overflow-hidden z-10"
         style={{
           background: project.panelBg,
-          minHeight: "calc(100vh - 84px - var(--tab-h))",
+          minHeight: `calc(100vh - ${TOP_BASE}px - var(--tab-h))`,
         }}
       >
-        <div className="grid min-h-[calc(100vh-84px-var(--tab-h))] grid-cols-1 gap-0 md:grid-cols-2">
+        <div
+          className="grid grid-cols-1 gap-0 md:grid-cols-2"
+          style={{ minHeight: `calc(100vh - ${TOP_BASE}px - var(--tab-h))` }}
+        >
           {/* Left Details */}
           <div className="flex flex-col justify-center px-8 py-12 md:px-12 md:py-16">
             <div
@@ -405,7 +405,7 @@ function ProjectPanel({
               className="group inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-widest transition-opacity hover:opacity-70"
               style={{ color: project.panelText }}
             >
-              DISCUSS PROJECT
+              CASE STUDY ON REQUEST
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
           </div>
@@ -435,30 +435,7 @@ export function Projects() {
 
   return (
     <section id="work" className="relative border-t border-black/10 project-section-container">
-      {/* ── Responsive tab size variables ── */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .project-section-container {
-          --tab-w: 64px;
-          --tab-overlap: 10px;
-          --tab-h: 40px;
-          --px-padding: 24px;
-        }
-        @media (min-width: 400px) {
-          .project-section-container {
-            --tab-w: 75px;
-            --tab-overlap: 12px;
-          }
-        }
-        @media (min-width: 768px) {
-          .project-section-container {
-            --tab-w: 180px;
-            --tab-overlap: 18px;
-            --tab-h: 44px;
-            --px-padding: 40px;
-          }
-        }
-      `}} />
-
+      {/* Responsive tab size variables — see .project-section-container in styles/globals.css */}
       {/* Header */}
       <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-24">
         <FadeIn>

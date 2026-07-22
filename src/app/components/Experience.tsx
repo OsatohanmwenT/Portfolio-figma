@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { PixelHeading, ScriptAccent, StickyNote, FolderTab, FadeIn } from "./primitives";
+import { EASE_OUT_EXPO } from "../lib/motion-tokens";
 
 type Role = {
   id: string;
@@ -137,7 +138,7 @@ function NoteCard({ role, index }: { role: Role; index: number }) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.45, ease: EASE_OUT_EXPO }}
               className="overflow-hidden"
             >
               <div className="border-t border-black/8 px-6 pb-8 pt-6 md:px-8">

@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { useEffect, useState, useRef } from "react";
 import { PixelHeading, ScriptAccent, StickyNote, SelectionBox, MagneticButton } from "./primitives";
 
@@ -30,7 +30,6 @@ function LiveClock() {
 }
 
 export function Hero({ ready }: HeroProps) {
-  const reduce = useReducedMotion();
   const constraintsRef = useRef<HTMLDivElement>(null);
 
   return (
@@ -39,13 +38,6 @@ export function Hero({ ready }: HeroProps) {
       ref={constraintsRef}
       className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden pt-16 pb-16"
     >
-      <style dangerouslySetInnerHTML={{ __html: `
-        .hero-name-text::selection {
-          background: #141414 !important;
-          color: #FFFFFF !important;
-        }
-      `}} />
-
       <div className="relative mx-auto w-full max-w-[1400px] px-6 md:px-10 flex flex-col items-center justify-center flex-1 z-10">
         {/* Status bar */}
         <motion.div
@@ -90,23 +82,27 @@ export function Hero({ ready }: HeroProps) {
               animate={ready ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.75 }}
               className="md:absolute md:left-[-190px] lg:left-[-230px] md:top-[45%] md:-translate-y-1/2 md:mb-0 mb-4 md:block flex justify-center"
+              data-collab-target="note-left"
             >
               <StickyNote color="grass" rotate={-2} drag={true} dragConstraints={constraintsRef}>
                 Most recently at <strong>VDT</strong>
               </StickyNote>
             </motion.div>
 
-            {/* SelectionBox Name */}
-            <SelectionBox drag={true} dragConstraints={constraintsRef} className="inline-block">
-              <PixelHeading
-                as="h1"
-                className="text-center text-[clamp(2.4rem,7.5vw,6.5rem)] text-foreground leading-[1.05] hero-name-text select-text"
-              >
-                OSATO
-                <br />
-                OSARENKHOE
-              </PixelHeading>
-            </SelectionBox>
+            {/* SelectionBox Name — data attribute is a one-time getBoundingClientRect
+                target for Collaborators (Phase B); not read on any per-frame path. */}
+            <div data-collab-target="hero-name" className="inline-block">
+              <SelectionBox drag={true} dragConstraints={constraintsRef} className="inline-block">
+                <PixelHeading
+                  as="h1"
+                  className="text-center text-[clamp(2.4rem,7.5vw,6.5rem)] text-foreground leading-[1.05] hero-name-text select-text"
+                >
+                  OSATO
+                  <br />
+                  OSARENKHOE
+                </PixelHeading>
+              </SelectionBox>
+            </div>
 
             {/* Right Floating Note (absolute on desktop, inline/margin on mobile) */}
             <motion.div
@@ -143,6 +139,7 @@ export function Hero({ ready }: HeroProps) {
           animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 1.05 }}
           className="mb-5 mx-auto max-w-lg text-center text-[1.1rem] font-medium leading-relaxed text-foreground/90 z-10"
+          data-collab-target="tagline"
         >
           I build the systems behind payments, learning, and AI products.
         </motion.p>
