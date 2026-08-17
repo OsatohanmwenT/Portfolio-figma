@@ -257,7 +257,7 @@ export function CountUp({
 }
 
 /* ------------------------------------------------------------------ */
-/* PixelHeading — Pixelify Sans display text                          */
+/* PixelHeading — Stack Sans Notch display text                         */
 /* ------------------------------------------------------------------ */
 export function PixelHeading({
   children,
@@ -273,7 +273,7 @@ export function PixelHeading({
   const C = Tag as "h2";
   return (
     <C
-      className={`font-display leading-none tracking-tight ${className}`}
+      className={`font-display font-bold leading-none ${className}`}
       style={{ fontFamily: "var(--font-display)", ...style }}
     >
       {children}
@@ -302,20 +302,20 @@ export function ScriptAccent({
 }
 
 /* ------------------------------------------------------------------ */
-/* StickyNote                                                           */
+/* StickyNote — Refined Minimalist Note Card                           */
 /* ------------------------------------------------------------------ */
 const NOTE_COLORS: Record<string, { bg: string; border: string }> = {
-  sky:       { bg: "#DDEEF9", border: "#4EA3E0" },
-  grass:     { bg: "#D8F0DC", border: "#6FBE7E" },
-  sunflower: { bg: "#FAF0D4", border: "#E9A93B" },
-  raspberry: { bg: "#FAD9E0", border: "#E24B6B" },
-  ink:       { bg: "#E8E8E8", border: "#141414" },
+  sky:       { bg: "#F4F8FF", border: "#B8D2FE" },
+  grass:     { bg: "#F2FDF5", border: "#A7F3D0" },
+  sunflower: { bg: "#FFFBEB", border: "#FDE68A" },
+  raspberry: { bg: "#FFF1F2", border: "#FECDD3" },
+  ink:       { bg: "#FAFAFA", border: "#E5E5E5" },
 };
 
 export function StickyNote({
   children,
   color = "sunflower",
-  rotate = 2,
+  rotate = 1.5,
   className = "",
   drag = false,
   dragConstraints,
@@ -332,22 +332,22 @@ export function StickyNote({
 
   return (
     <motion.div
-      className={`inline-block rounded-lg px-4 py-3 shadow-md ${className} ${
+      className={`inline-block rounded-xl px-4 py-3 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.03)] backdrop-blur-sm ${className} ${
         drag ? "cursor-grab active:cursor-grabbing select-none" : ""
       }`}
       style={{
         background: c.bg,
-        border: `1.5px solid ${c.border}`,
-        fontFamily: "var(--font-hand)",
-        fontSize: "1rem",
-        lineHeight: 1.3,
+        border: `1px solid ${c.border}`,
+        fontFamily: "var(--font-sans)",
+        fontSize: "0.92rem",
+        lineHeight: 1.35,
       }}
       {...(drag && !reduce
         ? {
             drag: true,
             dragConstraints: dragConstraints,
             dragElastic: 0.1,
-            whileDrag: { scale: 1.05, rotate: 0, zIndex: 50 },
+            whileDrag: { scale: 1.04, rotate: 0, zIndex: 50 },
             animate: { rotate: rotate },
           }
         : { animate: { rotate: rotate } })}
@@ -378,7 +378,7 @@ export function FolderTab({
 }
 
 /* ------------------------------------------------------------------ */
-/* SelectionBox — Figma selection frame                                */
+/* SelectionBox — Figma precision selection frame                      */
 /* ------------------------------------------------------------------ */
 export function SelectionBox({
   children,
@@ -396,7 +396,7 @@ export function SelectionBox({
   const reduce = useReducedMotion();
 
   const HANDLE =
-    "absolute h-2.5 w-2.5 rounded-sm border-2 border-[#4EA3E0] bg-white z-10 transition-transform hover:scale-125 hover:bg-[#4EA3E0] pointer-events-auto";
+    "absolute h-2.5 w-2.5 rounded-sm border-2 border-[#0052FF] bg-white z-10 transition-transform hover:scale-125 hover:bg-[#0052FF] pointer-events-auto";
 
   return (
     <motion.div
@@ -416,7 +416,7 @@ export function SelectionBox({
     >
       <motion.div
         className="pointer-events-none absolute inset-0 rounded-sm"
-        style={{ outline: "2px solid #4EA3E0", outlineOffset: "6px" }}
+        style={{ outline: "2px solid #0052FF", outlineOffset: "6px" }}
         initial={{ opacity: 0 }}
         animate={inView ? { opacity: 1 } : {}}
         transition={{ duration: reduce ? 0 : 0.3, delay: 0.15 }}
@@ -452,9 +452,9 @@ export function CommentCard({
 }) {
   return (
     <div
-      className={`relative w-full max-w-sm rounded-2xl border border-black/10 bg-white p-5 shadow-xl ${className}`}
+      className={`relative w-full max-w-sm rounded-2xl border border-[#E6E6E6] bg-white p-5 shadow-xl ${className}`}
     >
-      <div className="absolute -top-2 left-6 h-4 w-4 rotate-45 border-l border-t border-black/10 bg-white" />
+      <div className="absolute -top-2 left-6 h-4 w-4 rotate-45 border-l border-t border-[#E6E6E6] bg-white" />
       <div className="flex items-start gap-3">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#141414] font-mono text-[11px] uppercase tracking-wider text-white">
           {monogram}
@@ -467,7 +467,7 @@ export function CommentCard({
         </div>
       </div>
       <div className="mt-3 flex items-center gap-1.5">
-        <span className="rounded-full border border-black/10 px-2.5 py-0.5 font-mono text-[11px]">
+        <span className="rounded-full border border-[#E6E6E6] px-2.5 py-0.5 font-mono text-[11px]">
           ⚡ {reactions}
         </span>
       </div>
@@ -490,8 +490,8 @@ export function BrowserMockup({
   children?: ReactNode;
 }) {
   return (
-    <div className="w-full overflow-hidden rounded-xl border border-black/10 bg-white shadow-2xl">
-      <div className="flex items-center gap-2 border-b border-black/10 bg-[#F0EDE5] px-4 py-2.5">
+    <div className="w-full overflow-hidden rounded-xl border border-[#E6E6E6] bg-white shadow-2xl">
+      <div className="flex items-center gap-2 border-b border-[#E6E6E6] bg-[#F0EDE5] px-4 py-2.5">
         <span className="h-2.5 w-2.5 rounded-full bg-[#E24B6B]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[#E9A93B]" />
         <span className="h-2.5 w-2.5 rounded-full bg-[#6FBE7E]" />

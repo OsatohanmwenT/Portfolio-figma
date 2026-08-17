@@ -12,7 +12,7 @@ function LiveClock() {
   useEffect(() => {
     const fmt = () => {
       const now = new Date();
-      const hh = String(now.getUTCHours() + 1).padStart(2, "0"); // WAT = UTC+1
+      const hh = String((now.getUTCHours() + 1) % 24).padStart(2, "0"); // WAT = UTC+1
       const mm = String(now.getUTCMinutes()).padStart(2, "0");
       const ss = String(now.getUTCSeconds()).padStart(2, "0");
       setTime(`${hh}:${mm}:${ss}`);
@@ -23,7 +23,7 @@ function LiveClock() {
   }, []);
 
   return (
-    <span className="font-mono text-[13px] tabular-nums text-foreground/50">
+    <span className="font-mono text-[11px] tabular-nums text-foreground/70 font-medium tracking-tight">
       {time} WAT
     </span>
   );
@@ -36,7 +36,7 @@ export function Hero({ ready }: HeroProps) {
     <section
       id="top"
       ref={constraintsRef}
-      className="relative flex min-h-[100svh] flex-col justify-between overflow-hidden pt-16 pb-16"
+      className="relative flex min-h-[calc(100vh-84px)] flex-col items-center justify-center overflow-hidden py-10 md:py-16"
     >
       <div className="relative mx-auto w-full max-w-[1400px] px-6 md:px-10 flex flex-col items-center justify-center flex-1 z-10">
         {/* Status bar */}
@@ -44,16 +44,18 @@ export function Hero({ ready }: HeroProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="mb-4 flex flex-wrap items-center justify-center gap-4"
+          className="mb-5 flex flex-wrap items-center justify-center gap-3"
         >
-          <LiveClock />
-          <span className="flex items-center gap-2 rounded-full border border-[#6FBE7E]/40 bg-[#D8F0DC] px-3 py-1 font-mono text-[11px] uppercase tracking-wider text-[#22582D] font-semibold">
+          <div className="flex items-center gap-2 rounded-full border border-[#EBE9E2] bg-white px-3.5 py-1 shadow-2xs">
+            <LiveClock />
+          </div>
+          <div className="flex items-center gap-2 rounded-full border border-[#059669]/25 bg-[#ECFDF5] px-3.5 py-1 font-sans text-[11px] font-semibold uppercase tracking-wider text-[#047857]">
             <span className="relative flex h-1.5 w-1.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#6FBE7E] opacity-70" />
-              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#6FBE7E]" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#059669] opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-[#059669]" />
             </span>
             Available for new work
-          </span>
+          </div>
         </motion.div>
 
         {/* Script intro */}
@@ -61,9 +63,9 @@ export function Hero({ ready }: HeroProps) {
           initial={{ opacity: 0, y: 8 }}
           animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mb-1 text-center"
+          className="mb-2 mt-1 text-center"
         >
-          <ScriptAccent className="text-[1.5rem] text-foreground/50">
+          <ScriptAccent className="text-[1.65rem] text-foreground/75 leading-none">
             my name is
           </ScriptAccent>
         </motion.div>
@@ -73,7 +75,7 @@ export function Hero({ ready }: HeroProps) {
           initial={{ opacity: 0 }}
           animate={ready ? { opacity: 1 } : {}}
           transition={{ duration: 0.6, delay: 0.55 }}
-          className="mb-5 text-center z-20 relative w-full flex flex-col items-center"
+          className="mb-7 text-center z-20 relative w-full flex flex-col items-center"
         >
           <div className="relative inline-block">
             {/* Left Floating Note (absolute on desktop, inline/margin on mobile) */}
@@ -81,7 +83,7 @@ export function Hero({ ready }: HeroProps) {
               initial={{ opacity: 0, x: -20 }}
               animate={ready ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.75 }}
-              className="md:absolute md:left-[-190px] lg:left-[-230px] md:top-[45%] md:-translate-y-1/2 md:mb-0 mb-4 md:block flex justify-center"
+              className="md:absolute md:left-[-210px] lg:left-[-250px] md:top-[45%] md:-translate-y-1/2 md:mb-0 mb-4 md:block flex justify-center"
               data-collab-target="note-left"
             >
               <StickyNote color="grass" rotate={-2} drag={true} dragConstraints={constraintsRef}>
@@ -91,11 +93,11 @@ export function Hero({ ready }: HeroProps) {
 
             {/* SelectionBox Name — data attribute is a one-time getBoundingClientRect
                 target for Collaborators (Phase B); not read on any per-frame path. */}
-            <div data-collab-target="hero-name" className="inline-block">
-              <SelectionBox drag={true} dragConstraints={constraintsRef} className="inline-block">
+            <div data-collab-target="hero-name" className="inline-block px-4 py-2">
+              <SelectionBox drag={true} dragConstraints={constraintsRef} className="inline-block px-6 py-3">
                 <PixelHeading
                   as="h1"
-                  className="text-center text-[clamp(2.4rem,7.5vw,6.5rem)] text-foreground leading-[1.05] hero-name-text select-text"
+                  className="text-center text-[clamp(2.4rem,7.5vw,5.8rem)] text-foreground leading-[1.05] hero-name-text select-text tracking-normal font-bold"
                 >
                   OSATO
                   <br />
@@ -109,7 +111,7 @@ export function Hero({ ready }: HeroProps) {
               initial={{ opacity: 0, x: 20 }}
               animate={ready ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.75 }}
-              className="md:absolute md:right-[-190px] lg:right-[-230px] md:top-[45%] md:-translate-y-1/2 md:mt-0 mt-4 md:block flex justify-center"
+              className="md:absolute md:right-[-210px] lg:right-[-250px] md:top-[45%] md:-translate-y-1/2 md:mt-0 mt-4 md:block flex justify-center"
             >
               <StickyNote color="sunflower" rotate={2.5} drag={true} dragConstraints={constraintsRef}>
                 Previously at <strong>LAPO</strong>
@@ -123,13 +125,13 @@ export function Hero({ ready }: HeroProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.9 }}
-          className="mb-5 flex flex-wrap items-center justify-center gap-3 z-10"
+          className="mb-6 flex flex-wrap items-center justify-center gap-3 z-10"
         >
-          <span className="rounded-full bg-[#E24B6B] px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-white">
+          <span className="rounded-full bg-[#111111] px-4 py-1.5 font-sans text-[11px] font-medium tracking-wide text-white">
             NIGERIA · WAT
           </span>
-          <span className="rounded-full bg-[#E9A93B] px-4 py-1.5 font-mono text-[11px] uppercase tracking-widest text-white">
-            FULLSTACK · AI ENGINEER
+          <span className="rounded-full bg-[#0052FF] px-4 py-1.5 font-sans text-[11px] font-medium tracking-wide text-white">
+            FULL-STACK &amp; AI ENGINEER
           </span>
         </motion.div>
 
@@ -138,7 +140,7 @@ export function Hero({ ready }: HeroProps) {
           initial={{ opacity: 0, y: 10 }}
           animate={ready ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7, delay: 1.05 }}
-          className="mb-5 mx-auto max-w-lg text-center text-[1.1rem] font-medium leading-relaxed text-foreground/90 z-10"
+          className="mb-6 mx-auto max-w-lg text-center text-[1.15rem] font-normal leading-relaxed text-foreground/90 z-10"
           data-collab-target="tagline"
         >
           I build the systems behind payments, learning, and AI products.
@@ -153,35 +155,18 @@ export function Hero({ ready }: HeroProps) {
         >
           <MagneticButton
             href="#contact"
-            className="rounded-lg bg-foreground px-7 py-3.5 font-display text-[1rem] uppercase tracking-wide text-background transition-colors hover:bg-[#4EA3E0]"
+            className="rounded-lg bg-[#111111] px-8 py-3.5 font-sans font-semibold text-[0.95rem] tracking-wide text-white transition-all hover:bg-[#0052FF]"
           >
             CONTACT ME →
           </MagneticButton>
           <MagneticButton
             href="#work"
-            className="rounded-lg border-2 border-foreground/20 px-7 py-3.5 font-display text-[1rem] uppercase tracking-wide text-foreground transition-all hover:border-[#4EA3E0] hover:text-[#4EA3E0]"
+            className="rounded-lg border border-[#EBE9E2] bg-white px-8 py-3.5 font-sans font-semibold text-[0.95rem] tracking-wide text-[#111111] transition-all hover:border-[#0052FF] hover:text-[#0052FF] shadow-sm"
           >
             SEE WORK
           </MagneticButton>
         </motion.div>
       </div>
-
-      {/* Floating skill tags — bottom strip */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={ready ? { opacity: 1 } : {}}
-        transition={{ duration: 0.8, delay: 1.3 }}
-        className="mx-auto mt-auto w-full max-w-[1400px] px-6 pt-12 md:px-10"
-      >
-        <div className="flex flex-wrap items-center justify-center gap-2 font-mono text-[10px] uppercase tracking-[0.2em] text-foreground/50">
-          {["Frontend", "Backend", "AI Systems", "Payments", "APIs", "Infra"].map((tag, i) => (
-            <span key={tag} className="flex items-center gap-2">
-              {i > 0 && <span className="h-px w-4 bg-black/10" />}
-              {tag}
-            </span>
-          ))}
-        </div>
-      </motion.div>
     </section>
   );
 }

@@ -90,9 +90,10 @@ function NoteCard({ role, index }: { role: Role; index: number }) {
     <FadeIn y={30}>
       <div
         className={`group rounded-2xl border transition-all duration-500 ${
-          open ? "border-black/15 shadow-lg" : "border-black/8 hover:shadow-md"
+          open
+            ? "border-[#111111] shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white"
+            : "border-[#EBE9E2] bg-white hover:border-[#111111]/30 hover:shadow-sm"
         }`}
-        style={{ background: open ? "#FFFFFF" : "#FAFAF8" }}
       >
         <button
           onClick={() => setOpen((v) => !v)}
@@ -108,23 +109,23 @@ function NoteCard({ role, index }: { role: Role; index: number }) {
 
           <div className="flex flex-1 flex-col gap-1 md:flex-row md:items-baseline md:justify-between md:gap-8">
             <div>
-              <PixelHeading as="h3" className="text-[clamp(1.3rem,2.8vw,2.2rem)] text-foreground">
+              <PixelHeading as="h3" className="text-[clamp(1.3rem,2.8vw,2.2rem)] text-foreground tracking-tight">
                 {role.role}
               </PixelHeading>
-              <div className="mt-1 font-mono text-[11px] uppercase tracking-wider text-foreground/60 font-semibold">
+              <div className="mt-1 font-sans text-[12px] uppercase tracking-wider text-foreground/70 font-semibold">
                 {role.company}
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full border border-black/10 px-3 py-0.5 font-mono text-[10px] uppercase tracking-wider text-foreground/50">
+              <span className="rounded-full border border-[#EBE9E2] bg-[#F8F7F3] px-3.5 py-1 font-sans text-[11px] font-medium tracking-wide text-foreground/70">
                 {role.period}
               </span>
             </div>
           </div>
 
           <span
-            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-black/10 transition-all duration-500 ${
-              open ? "rotate-45 border-transparent text-white" : "text-foreground/50"
+            className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#EBE9E2] transition-all duration-500 ${
+              open ? "rotate-45 border-transparent text-white" : "text-foreground/50 hover:bg-[#F4F3EE]"
             }`}
             style={open ? { background: role.color } : {}}
           >
@@ -141,21 +142,21 @@ function NoteCard({ role, index }: { role: Role; index: number }) {
               transition={{ duration: 0.45, ease: EASE_OUT_EXPO }}
               className="overflow-hidden"
             >
-              <div className="border-t border-black/8 px-6 pb-8 pt-6 md:px-8">
+              <div className="border-t border-[#E6E6E6] px-6 pb-8 pt-6 md:px-8">
                 {/* One-line Summary */}
-                <p className="mb-8 max-w-3xl text-[1rem] leading-relaxed text-foreground/95 font-semibold">
+                <p className="mb-8 max-w-3xl text-[1rem] leading-relaxed text-foreground/95 font-medium">
                   {role.summary}
                 </p>
 
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
                   {/* Achievements/Highlights (spans 2 columns on desktop) */}
                   <div className="md:col-span-2">
-                    <div className="mb-4 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
+                    <div className="mb-4 font-mono text-[10px] uppercase tracking-widest text-foreground/60">
                       Key Engineering Achievements
                     </div>
                     <ul className="space-y-3.5">
                       {role.highlights.map((h, i) => (
-                        <li key={i} className="flex items-start gap-3 text-[0.95rem] font-medium leading-relaxed text-foreground/90">
+                        <li key={i} className="flex items-start gap-3 text-[0.95rem] font-normal leading-relaxed text-foreground/90">
                           <span
                             className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full"
                             style={{ background: role.color }}
@@ -170,12 +171,12 @@ function NoteCard({ role, index }: { role: Role; index: number }) {
                   <div className="flex flex-col gap-6">
                     {/* Projects */}
                     <div>
-                      <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
+                      <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/60">
                         Projects
                       </div>
                       <ul className="space-y-2">
                         {role.projects.map((p) => (
-                          <li key={p} className="flex items-start gap-2 text-[0.9rem] font-medium leading-relaxed text-foreground/90">
+                          <li key={p} className="flex items-start gap-2 text-[0.9rem] font-normal leading-relaxed text-foreground/90">
                             <span
                               className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                               style={{ background: role.color }}
@@ -188,7 +189,7 @@ function NoteCard({ role, index }: { role: Role; index: number }) {
 
                     {/* Tech Stack */}
                     <div>
-                      <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/45">
+                      <div className="mb-3 font-mono text-[10px] uppercase tracking-widest text-foreground/60">
                         Stack
                       </div>
                       <div className="flex flex-wrap gap-2">
@@ -210,11 +211,11 @@ function NoteCard({ role, index }: { role: Role; index: number }) {
 
 export function Experience() {
   return (
-    <section id="experience" className="relative border-t border-black/10 py-24 md:py-36">
+    <section id="experience" className="relative border-t border-[#E6E6E6] py-24 md:py-36">
       <div className="mx-auto max-w-[1400px] px-6 md:px-10">
         {/* Header */}
         <FadeIn>
-          <ScriptAccent className="text-[1.75rem] text-foreground/40">where I've built</ScriptAccent>
+          <ScriptAccent className="text-[1.75rem] text-foreground/60">where I've built</ScriptAccent>
         </FadeIn>
         <div className="mt-3 mb-12 flex flex-wrap items-end gap-6 md:justify-between">
           <FadeIn delay={0.05}>

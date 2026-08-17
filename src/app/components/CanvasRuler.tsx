@@ -70,7 +70,7 @@ export function CanvasRuler() {
   return (
     <div
       aria-hidden
-      className="pointer-events-none fixed left-0 right-0 z-40 overflow-hidden border-b border-black/10 bg-[#F7F5EF]"
+      className="pointer-events-none fixed left-0 right-0 z-40 overflow-hidden border-b border-[#EBE9E2] bg-[#FBFBF8]"
       style={{ top: NAV_H, height: RULER_H }}
     >
       <svg width={width} height={RULER_H} style={{ display: "block" }}>

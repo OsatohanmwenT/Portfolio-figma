@@ -51,7 +51,7 @@ const COLLABORATORS: CollabDef[] = [
   {
     id: "maya",
     name: "MAYA",
-    color: "#4EA3E0",
+    color: "#0052FF",
     targetSelector: '[data-collab-target="hero-name"]',
     fallbackPct: { x: 50, y: 34 },
     enterPct: { x: -12, y: -12 },
@@ -65,7 +65,7 @@ const COLLABORATORS: CollabDef[] = [
   {
     id: "kai",
     name: "KAI",
-    color: "#6FBE7E",
+    color: "#059669",
     targetSelector: '[data-collab-target="note-left"]',
     fallbackPct: { x: 22, y: 46 },
     enterPct: { x: 114, y: 18 },
@@ -79,7 +79,7 @@ const COLLABORATORS: CollabDef[] = [
   {
     id: "dev",
     name: "DEV",
-    color: "#E9A93B",
+    color: "#D97706",
     targetSelector: '[data-collab-target="tagline"]',
     fallbackPct: { x: 50, y: 62 },
     enterPct: { x: 58, y: 118 },

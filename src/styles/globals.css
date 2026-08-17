@@ -33,3 +33,17 @@
     --px-padding: 40px;
   }
 }
+
+@layer base {
+  /* Keyboard focus ring */
+  :focus-visible {
+    outline: 2px solid var(--sky);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Balanced headings where supported */
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+}

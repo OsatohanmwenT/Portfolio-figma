@@ -24,5 +24,5 @@
     }
   },
   "include": ["src", "vite.config.ts"],
-  "exclude": ["node_modules", "src/imports/pasted_text"]
+  "exclude": ["node_modules", "src/imports/pasted_text", "src/app/pages", "src/app/components/Layout.tsx", "src/app/components/ProjectIndex.tsx"]
 }
