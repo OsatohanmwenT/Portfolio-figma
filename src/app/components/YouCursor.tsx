@@ -1,29 +1,33 @@
-import { useEffect, useState } from "react";
-import { motion, useMotionValue, useSpring, useReducedMotion } from "motion/react";
+import { useEffect } from "react";
+import { animate, motion, useMotionValue, useSpring, useReducedMotion } from "motion/react";
+import { usePointerFine } from "../lib/usePointerFine";
+import { SPRING } from "../lib/motion-tokens";
+import { CursorLabel } from "./CursorLabel";
 
 export function YouCursor() {
   const reduce = useReducedMotion();
-  const [visible, setVisible] = useState(false);
-  const [isTouch, setIsTouch] = useState(false);
+  const pointerFine = usePointerFine();
 
   const rawX = useMotionValue(-200);
   const rawY = useMotionValue(-200);
-  const x = useSpring(rawX, { stiffness: 200, damping: 28, mass: 0.6 });
-  const y = useSpring(rawY, { stiffness: 200, damping: 28, mass: 0.6 });
+  const x = useSpring(rawX, SPRING.cursor);
+  const y = useSpring(rawY, SPRING.cursor);
+  // Previously a `visible` boolean in React state, set on every single
+  // mousemove event (~120Hz) even when already true — React bails out on
+  // the identical value, but the call still enters the scheduler every
+  // time. Opacity is now a plain MotionValue driven imperatively, so this
+  // component never re-renders after mount.
+  const opacity = useMotionValue(0);
 
   useEffect(() => {
-    // Detect touch-primary devices and bail out
-    if (window.matchMedia("(hover: none)").matches) {
-      setIsTouch(true);
-      return;
-    }
+    if (!pointerFine || reduce) return;
 
     const onMove = (e: MouseEvent) => {
       rawX.set(e.clientX);
       rawY.set(e.clientY);
-      setVisible(true);
+      if (opacity.get() !== 1) animate(opacity, 1, { duration: 0.15 });
     };
-    const onLeave = () => setVisible(false);
+    const onLeave = () => animate(opacity, 0, { duration: 0.15 });
 
     window.addEventListener("mousemove", onMove);
     document.documentElement.addEventListener("mouseleave", onLeave);
@@ -31,40 +35,17 @@ export function YouCursor() {
       window.removeEventListener("mousemove", onMove);
       document.documentElement.removeEventListener("mouseleave", onLeave);
     };
-  }, [rawX, rawY]);
+  }, [rawX, rawY, opacity, pointerFine, reduce]);
 
-  if (isTouch || reduce) return null;
+  if (!pointerFine || reduce) return null;
 
   return (
     <motion.div
       aria-hidden
       className="pointer-events-none fixed left-0 top-0 z-[9999]"
-      style={{ x, y, translateX: "-50%", translateY: "-50%" }}
-      animate={{ opacity: visible ? 1 : 0 }}
-      transition={{ duration: 0.15 }}
+      style={{ x, y, opacity, translateX: "-50%", translateY: "-50%" }}
     >
-      {/* pointer tail */}
-      <svg
-        width="12"
-        height="16"
-        viewBox="0 0 12 16"
-        className="absolute -bottom-3 -left-1"
-        style={{ fill: "#141414" }}
-      >
-        <path d="M0 0 L5 14 L7 9 L12 9 Z" />
-      </svg>
-      {/* pill label */}
-      <div
-        className="flex items-center rounded-full px-2.5 py-1"
-        style={{ background: "#141414" }}
-      >
-        <span
-          className="font-mono text-[10px] uppercase tracking-widest text-white"
-          style={{ fontFamily: "var(--font-mono)" }}
-        >
-          YOU
-        </span>
-      </div>
+      <CursorLabel label="YOU" />
     </motion.div>
   );
 }

@@ -1,5 +1,11 @@
 import { ArrowUpRight } from "lucide-react";
 import { PixelHeading, ScriptAccent, StickyNote, FadeIn, CountUp } from "./primitives";
+import { TOP_BASE } from "../lib/layout";
+import img0 from "../../imports/image.png";
+import img1 from "../../imports/image-1.png";
+import img2 from "../../imports/image-2.png";
+import img10 from "../../imports/image-10.png";
+import img11 from "../../imports/image-11.png";
 
 type Metric = { label: string; value: number; suffix?: string; decimals?: number };
 
@@ -19,6 +25,7 @@ type Project = {
   tabText: string;
   mockupAccent: string;
   mockupLines: string[];
+  image?: string;
 };
 
 const PROJECTS: Project[] = [
@@ -37,12 +44,13 @@ const PROJECTS: Project[] = [
       { label: "Roadmap nodes", value: 200, suffix: "+" },
       { label: "Vector dims", value: 1536 },
     ],
-    panelBg: "#4EA3E0",
+    panelBg: "#0052FF",
     panelText: "#FFFFFF",
-    tabBg: "#4EA3E0",
+    tabBg: "#0052FF",
     tabText: "#FFFFFF",
-    mockupAccent: "#4EA3E0",
+    mockupAccent: "#0052FF",
     mockupLines: ["Career Roadmap", "Match score: 91%", "Next: System Design", "Progress: 68%"],
+    image: img0,
   },
   {
     id: "adaptive",
@@ -59,12 +67,13 @@ const PROJECTS: Project[] = [
       { label: "Quiz latency", value: 1.2, suffix: "s", decimals: 1 },
       { label: "Course modules", value: 120, suffix: "+" },
     ],
-    panelBg: "#141414",
+    panelBg: "#111111",
     panelText: "#FFFFFF",
-    tabBg: "#141414",
+    tabBg: "#111111",
     tabText: "#FFFFFF",
-    mockupAccent: "#6FBE7E",
+    mockupAccent: "#059669",
     mockupLines: ["Module 4: Algorithms", "Quiz generated — 5 questions", "Your score: 88%", "Adapting path…"],
+    image: img1,
   },
   {
     id: "laptop",
@@ -81,12 +90,13 @@ const PROJECTS: Project[] = [
       { label: "Cache hit rate", value: 92, suffix: "%" },
       { label: "Ranking factors", value: 12 },
     ],
-    panelBg: "#E9A93B",
-    panelText: "#141414",
-    tabBg: "#E9A93B",
-    tabText: "#141414",
-    mockupAccent: "#E9A93B",
+    panelBg: "#059669",
+    panelText: "#FFFFFF",
+    tabBg: "#059669",
+    tabText: "#FFFFFF",
+    mockupAccent: "#D97706",
     mockupLines: ["MacBook Pro M3 ↗", "Dell XPS 15 ↗", "Lenovo ThinkPad ↗", "Sorted by score"],
+    image: img2,
   },
   {
     id: "expense",
@@ -103,12 +113,13 @@ const PROJECTS: Project[] = [
       { label: "Report types", value: 6 },
       { label: "Query time", value: 80, suffix: "ms" },
     ],
-    panelBg: "#E24B6B",
+    panelBg: "#6366F1",
     panelText: "#FFFFFF",
-    tabBg: "#E24B6B",
+    tabBg: "#6366F1",
     tabText: "#FFFFFF",
     mockupAccent: "#E24B6B",
     mockupLines: ["Jan spending: ₦142k", "Food: 38% · Rent: 42%", "Savings rate: 20%", "vs last month: ↑ 4%"],
+    image: img10,
   },
   {
     id: "vms",
@@ -125,12 +136,13 @@ const PROJECTS: Project[] = [
       { label: "Admin views", value: 9 },
       { label: "Uptime", value: 99.9, suffix: "%", decimals: 1 },
     ],
-    panelBg: "#6FBE7E",
-    panelText: "#141414",
-    tabBg: "#6FBE7E",
-    tabText: "#141414",
-    mockupAccent: "#6FBE7E",
+    panelBg: "#D97706",
+    panelText: "#FFFFFF",
+    tabBg: "#D97706",
+    tabText: "#FFFFFF",
+    mockupAccent: "#059669",
     mockupLines: ["Visitor: John Doe", "Stage 2/4 — Security", "Approved by: Manager", "Badge printed ✓"],
+    image: img11,
   },
   {
     id: "church",
@@ -147,39 +159,35 @@ const PROJECTS: Project[] = [
       { label: "Modules", value: 5 },
       { label: "Records handled", value: 25, suffix: "k+" },
     ],
-    panelBg: "#4A3420",
+    panelBg: "#1E293B",
     panelText: "#FFFFFF",
-    tabBg: "#4A3420",
+    tabBg: "#1E293B",
     tabText: "#FFFFFF",
-    mockupAccent: "#E9A93B",
+    mockupAccent: "#D97706",
     mockupLines: ["Members: 1,204", "Attendance: 87%", "Tithes: ₦4.2M", "5 active modules"],
   },
 ];
 
-const NAV_H = 56;
-const RULER_H = 28;
-const TOP_BASE = NAV_H + RULER_H; // 84px — clears fixed header
-
 function ProjectMockup({ project }: { project: Project }) {
   const isDark =
-    project.panelBg === "#141414" ||
-    project.panelBg === "#4A3420" ||
-    project.panelBg === "#E24B6B" ||
-    project.panelBg === "#4EA3E0";
+    project.panelBg === "#111111" ||
+    project.panelBg === "#1E293B" ||
+    project.panelBg === "#6366F1" ||
+    project.panelBg === "#0052FF";
 
   return (
     <div
-      className="w-full overflow-hidden rounded-xl shadow-2xl"
+      className="w-full overflow-hidden rounded-xl shadow-2xl transition-transform duration-500 hover:scale-[1.015]"
       style={{
-        border: `1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)"}`,
-        background: isDark ? "#1a1a1a" : "#FFFFFF",
+        border: `1px solid ${isDark ? "rgba(255,255,255,0.15)" : "#E6E6E6"}`,
+        background: isDark ? "#161616" : "#FFFFFF",
       }}
     >
       <div
         className="flex items-center gap-2 border-b px-4 py-3"
         style={{
-          borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)",
-          background: isDark ? "#111" : "#F0EDE5",
+          borderColor: isDark ? "rgba(255,255,255,0.1)" : "#E5E2D9",
+          background: isDark ? "#111111" : "#F0EDE5",
         }}
       >
         <span className="h-2.5 w-2.5 rounded-full bg-[#E24B6B]" />
@@ -188,14 +196,14 @@ function ProjectMockup({ project }: { project: Project }) {
         <span
           className="ml-3 flex-1 truncate rounded-full px-3 py-0.5 font-mono text-[10px]"
           style={{
-            background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)",
-            color: isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
+            background: isDark ? "rgba(255,255,255,0.08)" : "#EAE7DF",
+            color: isDark ? "#A0A0A0" : "#666666",
           }}
         >
           {project.id}.devspace.dev
         </span>
         <span
-          className="rounded px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider"
+          className="rounded px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider font-bold"
           style={{
             background: project.mockupAccent,
             color:
@@ -204,54 +212,65 @@ function ProjectMockup({ project }: { project: Project }) {
                 : "#fff",
           }}
         >
-          IMAGE.JPG
+          PREVIEW
         </span>
       </div>
 
-      <div className="p-5" style={{ minHeight: 200 }}>
-        <div
-          className="mb-4 font-display text-[1.4rem] leading-tight"
-          style={{
-            color: isDark ? "#FFFFFF" : "#141414",
-            fontFamily: "var(--font-display)",
-          }}
-        >
-          {project.mockupLines[0]}
+      {project.image ? (
+        <div className="relative w-full overflow-hidden bg-black/5" style={{ minHeight: 220, maxHeight: 320 }}>
+          <img
+            src={project.image}
+            alt={project.name}
+            className="w-full h-full object-cover object-top transition-transform duration-700 hover:scale-105"
+            loading="lazy"
+          />
         </div>
+      ) : (
+        <div className="p-6" style={{ minHeight: 220 }}>
+          <div
+            className="mb-4 font-display text-[1.4rem] leading-tight"
+            style={{
+              color: isDark ? "#FFFFFF" : "#141414",
+              fontFamily: "var(--font-display)",
+            }}
+          >
+            {project.mockupLines[0]}
+          </div>
 
-        <div className="flex flex-col gap-2.5">
-          {project.mockupLines.slice(1).map((line, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div
-                className="h-1.5 w-1.5 shrink-0 rounded-full"
-                style={{ background: project.mockupAccent }}
-              />
-              <div
-                className="h-3 flex-1 rounded-full"
-                style={{
-                  background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-                  maxWidth: `${75 - i * 12}%`,
-                }}
-              />
-              <span
-                className="font-mono text-[10px]"
-                style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)" }}
-              >
-                {line}
-              </span>
-            </div>
-          ))}
+          <div className="flex flex-col gap-2.5">
+            {project.mockupLines.slice(1).map((line, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div
+                  className="h-1.5 w-1.5 shrink-0 rounded-full"
+                  style={{ background: project.mockupAccent }}
+                />
+                <div
+                  className="h-3 flex-1 rounded-full"
+                  style={{
+                    background: isDark ? "rgba(255,255,255,0.1)" : "#EAE7DF",
+                    maxWidth: `${75 - i * 12}%`,
+                  }}
+                />
+                <span
+                  className="font-mono text-[10px]"
+                  style={{ color: isDark ? "#AAAAAA" : "#666666" }}
+                >
+                  {line}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <div
+            className="mt-5 h-1 w-full rounded-full opacity-30"
+            style={{ background: project.mockupAccent }}
+          />
+          <div
+            className="mt-1 h-1 rounded-full"
+            style={{ background: project.mockupAccent, width: "62%" }}
+          />
         </div>
-
-        <div
-          className="mt-5 h-1 w-full rounded-full opacity-30"
-          style={{ background: project.mockupAccent }}
-        />
-        <div
-          className="mt-1 h-1 rounded-full"
-          style={{ background: project.mockupAccent, width: "62%" }}
-        />
-      </div>
+      )}
     </div>
   );
 }
@@ -334,10 +353,13 @@ function ProjectPanel({
         className="relative w-full overflow-hidden z-10"
         style={{
           background: project.panelBg,
-          minHeight: "calc(100vh - 84px - var(--tab-h))",
+          minHeight: `calc(100vh - ${TOP_BASE}px - var(--tab-h))`,
         }}
       >
-        <div className="grid min-h-[calc(100vh-84px-var(--tab-h))] grid-cols-1 gap-0 md:grid-cols-2">
+        <div
+          className="grid grid-cols-1 gap-0 md:grid-cols-2"
+          style={{ minHeight: `calc(100vh - ${TOP_BASE}px - var(--tab-h))` }}
+        >
           {/* Left Details */}
           <div className="flex flex-col justify-center px-8 py-12 md:px-12 md:py-16">
             <div
@@ -373,7 +395,7 @@ function ProjectPanel({
             </PixelHeading>
 
             <p
-              className="mb-8 max-w-md text-[1rem] font-medium leading-relaxed"
+              className="mb-8 max-w-md text-[1rem] font-normal leading-relaxed"
               style={{ color: isLightPanel ? "rgba(20,20,20,0.90)" : "rgba(255,255,255,0.90)" }}
             >
               {project.problem}
@@ -405,7 +427,7 @@ function ProjectPanel({
               className="group inline-flex items-center gap-2 font-mono text-[12px] uppercase tracking-widest transition-opacity hover:opacity-70"
               style={{ color: project.panelText }}
             >
-              DISCUSS PROJECT
+              CASE STUDY ON REQUEST
               <ArrowUpRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </a>
           </div>
@@ -434,35 +456,12 @@ export function Projects() {
   };
 
   return (
-    <section id="work" className="relative border-t border-black/10 project-section-container">
-      {/* ── Responsive tab size variables ── */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        .project-section-container {
-          --tab-w: 64px;
-          --tab-overlap: 10px;
-          --tab-h: 40px;
-          --px-padding: 24px;
-        }
-        @media (min-width: 400px) {
-          .project-section-container {
-            --tab-w: 75px;
-            --tab-overlap: 12px;
-          }
-        }
-        @media (min-width: 768px) {
-          .project-section-container {
-            --tab-w: 180px;
-            --tab-overlap: 18px;
-            --tab-h: 44px;
-            --px-padding: 40px;
-          }
-        }
-      `}} />
-
+    <section id="work" className="relative border-t border-[#EBE9E2] project-section-container">
+      {/* Responsive tab size variables — see .project-section-container in styles/globals.css */}
       {/* Header */}
       <div className="mx-auto max-w-[1400px] px-6 py-16 md:px-10 md:py-24">
         <FadeIn>
-          <ScriptAccent className="text-[1.75rem] text-foreground/40">explore my work!</ScriptAccent>
+          <ScriptAccent className="text-[1.75rem] text-foreground/60">explore my work!</ScriptAccent>
         </FadeIn>
         <div className="mt-3 flex flex-wrap items-end gap-6 md:justify-between">
           <FadeIn delay={0.05}>

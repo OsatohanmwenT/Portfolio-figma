@@ -2,54 +2,54 @@
 
 :root {
   --font-size: 16px;
-  /* Light paper-canvas palette */
-  --background: #F7F5EF;
-  --foreground: #141414;
+  /* Minimal & Premium alabaster palette */
+  --background: #FBFBF8;
+  --foreground: #111111;
   --card: #FFFFFF;
-  --card-foreground: #141414;
+  --card-foreground: #111111;
   --popover: #FFFFFF;
-  --popover-foreground: #141414;
-  --primary: #141414;
-  --primary-foreground: #F7F5EF;
-  --secondary: #EDE9DF;
-  --secondary-foreground: #141414;
-  --muted: #EDE9DF;
-  --muted-foreground: #6B6559;
-  /* Brand accent = sky blue */
-  --accent: #4EA3E0;
+  --popover-foreground: #111111;
+  --primary: #111111;
+  --primary-foreground: #FBFBF8;
+  --secondary: #F4F3EE;
+  --secondary-foreground: #111111;
+  --muted: #F4F3EE;
+  --muted-foreground: #73726E;
+  /* Brand accent = Precision Cobalt */
+  --accent: #0052FF;
   --accent-foreground: #FFFFFF;
   --destructive: #E24B6B;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(20, 20, 20, 0.12);
-  --input: rgba(20, 20, 20, 0.06);
-  --input-background: rgba(20, 20, 20, 0.04);
-  --switch-background: #D4CFC4;
+  --border: #EBE9E2;
+  --input: #F4F3EE;
+  --input-background: #F8F7F3;
+  --switch-background: #E5E3DC;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #4EA3E0;
+  --ring: #0052FF;
   /* Canvas brand colors */
-  --sky: #4EA3E0;
-  --grass: #6FBE7E;
-  --sunflower: #E9A93B;
+  --sky: #0052FF;
+  --grass: #059669;
+  --sunflower: #D97706;
   --raspberry: #E24B6B;
   --brown: #4A3420;
-  --ink: #141414;
-  --grid-line: rgba(20, 20, 20, 0.05);
+  --ink: #111111;
+  --grid-line: #F4F3EE;
   /* Charts */
-  --chart-1: #4EA3E0;
-  --chart-2: #6FBE7E;
-  --chart-3: #E9A93B;
+  --chart-1: #0052FF;
+  --chart-2: #059669;
+  --chart-3: #D97706;
   --chart-4: #E24B6B;
-  --chart-5: #141414;
+  --chart-5: #111111;
   --radius: 0.5rem;
-  --sidebar: #F0EDE5;
-  --sidebar-foreground: #141414;
-  --sidebar-primary: #141414;
-  --sidebar-primary-foreground: #F7F5EF;
-  --sidebar-accent: #EDE9DF;
-  --sidebar-accent-foreground: #141414;
-  --sidebar-border: rgba(20, 20, 20, 0.12);
-  --sidebar-ring: #4EA3E0;
+  --sidebar: #F4F3EE;
+  --sidebar-foreground: #111111;
+  --sidebar-primary: #111111;
+  --sidebar-primary-foreground: #FBFBF8;
+  --sidebar-accent: #EBE9E2;
+  --sidebar-accent-foreground: #111111;
+  --sidebar-border: #EBE9E2;
+  --sidebar-ring: #0052FF;
 }
 
 @theme inline {
@@ -133,7 +133,7 @@
     border-radius: 999px;
   }
   *:hover::-webkit-scrollbar-thumb {
-    background: rgba(20, 20, 20, 0.18);
+    background: #C8C8C8;
   }
 
   .font-display {
@@ -153,19 +153,21 @@
   h1 {
     font-size: var(--text-2xl);
     font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
   }
 
   h2 {
     font-size: var(--text-xl);
     font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    line-height: 1.4;
+    letter-spacing: -0.01em;
   }
 
   h3 {
     font-size: var(--text-lg);
     font-weight: var(--font-weight-medium);
-    line-height: 1.5;
+    line-height: 1.45;
   }
 
   h4 {
